@@ -1,0 +1,21 @@
+{
+  "network": "zetachain-mainnet",
+  "chainID": 7000,
+  "v1": false,
+  "v2": {
+    "indexFactory": [
+      {
+        "name": "IndexFactoryV2",
+        "address": "0xE6Ad5B1a27e47a7742bE04De465990696656680a",
+        "startBlock": 5479427,
+        "nativeAsset": {
+          "name": "ZETA",
+          "symbol": "ZETA",
+          "decimals": 18
+        }
+      }
+    ]
+  },
+  "ephtr": false,
+  "savingsVaults": false
+}
