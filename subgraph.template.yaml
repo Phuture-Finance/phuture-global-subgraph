@@ -89,6 +89,51 @@ dataSources:
       file: ./src/v2/IndexFactory.ts
 {{/indexFactory}}      
 {{/v2}}
+{{#v3}}
+{{#indexFactory}}
+  - kind: ethereum
+    name: {{name}}
+    network: {{network}}
+    context:
+      chainID:
+        type: BigInt
+        data: "{{chainID}}"
+      nativeAsset:
+        type: List
+        data:
+          - type: String
+            data: "{{nativeAsset.name}}"
+          - type: String
+            data: "{{nativeAsset.symbol}}"
+          - type: Int
+            data: {{nativeAsset.decimals}}
+    source:
+      address: "{{address}}"
+      abi: IndexFactoryV3
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Index
+      abis:
+        - name: IndexFactoryV3
+          file: ./abis/v3/IndexFactoryV3.json
+        - name: IndexTokenV3
+          file: ./abis/v3/IndexTokenV3.json
+        - name: AutoGovernance
+          file: ./abis/v3/AutoGovernanceV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: MakerERC20
+          file: ./abis/v1/MakerERC20.json
+      eventHandlers:
+        - event: Deployed(address,string,string,address,address)
+          handler: handleIndexDeployed
+      file: ./src/v3/IndexFactory.ts
+{{/indexFactory}}      
+{{/v3}}
 {{#ephtr}}
   - kind: ethereum
     name: ephtr
@@ -413,3 +458,83 @@ templates:
       file: ./src/v2/Messenger.ts
   
 {{/v2}}
+{{#v3}}
+  - kind: ethereum
+    name: IndexTokenV3
+    network: {{network}}
+    source:
+      abi: IndexTokenV3
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - IndexAsset
+        - Index
+        - HistoricalIndexBalances
+      abis:
+        - name: IndexTokenV3
+          file: ./abis/v3/IndexTokenV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: MakerERC20
+          file: ./abis/v1/MakerERC20.json
+      eventHandlers:
+        - event: Deposit(indexed address,indexed address,uint256,uint256)
+          handler: handleDeposit
+        - event: Withdraw(indexed address,indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleWithdraw
+        - event: FeeAccrued(uint96,uint96,uint96)
+          handler: handleFeeAccrued
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/v3/IndexToken.ts
+  - kind: ethereum
+    name: ConfigBuilderV3
+    network: {{network}}
+    source:
+      abi: ConfigBuilderV3
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: 
+        - Index
+        - IndexAsset
+      abis: 
+        - name: ConfigBuilderV3
+          file: ./abis/v3/ConfigBuilderV3.json
+      eventHandlers:
+        - event: ConfigUpdated(bytes)
+          handler: handleConfigUpdate
+        - event: CurrencyRegistered(address,string,string,uint8)
+          handler: handleCurrencyRegistered
+        - event: FinishVaultRebalancing(uint256,uint256[],address[],uint256[])
+          handler: handleFinishChainRebalancing
+        - event: FinishRebalancing(uint256,uint256[],uint256[])
+          handler: handleFinishRebalancing
+        - event: StartRebalancing()
+          handler: handleStartRebalancing
+      file: ./src/v3/ConfigBuilder.ts
+  - kind: ethereum
+    name: AutoGovernanceV3
+    network: {{network}}
+    source:
+      abi: AutoGovernanceV3
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: 
+        - Index
+      abis: 
+        - name: AutoGovernanceV3
+          file: ./abis/v3/AutoGovernanceV3.json
+        - name: ConfigBuilderV3
+          file: ./abis/v3/ConfigBuilderV3.json
+      eventHandlers:
+        - event: SetConfigBuilder(address)
+          handler: handleSetConfigBuilder
+      file: ./src/v3/Governance.ts
+  
+{{/v3}}
