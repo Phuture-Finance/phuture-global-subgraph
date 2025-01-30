@@ -1,6 +1,6 @@
 import { Bytes, BigInt, Address, ethereum, dataSource, BigDecimal, log, ByteArray, TypedMap, DataSourceContext } from "@graphprotocol/graph-ts";
 import { createOrLoadAnatomyEntity, createOrLoadChainIDToAssetMappingEntity, createOrLoadConfigEntity, createOrLoadCurrencySetEntity, createOrLoadHistoricalIndexAssetEntity, createOrLoadHistoricalIndexBalanceEntity, createOrLoadIndexAssetEntity, createOrLoadIndexEntity, loadChainIDToAssetMappingEntity, loadIndexAssetEntity } from "../EntityCreation";
-import { ConfigUpdated as ConfigUpdatedEvent, CurrencyRegistered as CurrencyRegisteredEvent, FinishVaultRebalancing as FinishVaultRebalancingEvent, RegisterChain as RegisterChainEvent, FinishRebalancing as FinishRebalancingEvent, StartRebalancing as StartRebalancingEvent } from "../../generated/templates/ConfigBuilderV3/ConfigBuilderV3"
+import { ConfigUpdated as ConfigUpdatedEvent, CurrencyRegistered as CurrencyRegisteredEvent, FinishVaultRebalancing as FinishVaultRebalancingEvent, FinishRebalancing as FinishRebalancingEvent, StartRebalancing as StartRebalancingEvent } from "../../generated/templates/ConfigBuilderV3/ConfigBuilderV3"
 import { convertAUMFeeRate } from "../v1/FeePool";
 import { CurrencySet, HistoricalIndexAsset } from "../../generated/schema";
 import { Messenger } from "../../generated/templates";
@@ -9,7 +9,7 @@ export function handleConfigUpdate(event: ConfigUpdatedEvent): void {
     let indexAddress = dataSource.context().getBytes('indexAddress')
     let indexEntity = createOrLoadIndexEntity(indexAddress)
     let configEntity = createOrLoadConfigEntity(indexAddress)
-    let decoded = ethereum.decode('((uint256,bool,address),(uint16,bool),(uint16,bool))', event.params.param0)!.toTuple()
+    let decoded = ethereum.decode('((uint256,bool,address),(uint16,bool),(uint16,bool))', event.params.encodedConfig)!.toTuple()
     configEntity.AUMDilutionPerSecond = decoded[0].toTuple()[0].toBigInt()
     configEntity.useCustomAUMFee = decoded[0].toTuple()[1].toBoolean()
     configEntity.metadata = decoded[0].toTuple()[2].toAddress()
@@ -37,9 +37,10 @@ export function handleStartRebalancing(event: StartRebalancingEvent): void {
 
 export function handleCurrencyRegistered(event: CurrencyRegisteredEvent): void {
     let indexAddress = dataSource.context().getBytes('indexAddress')
-    log.debug("Currency registered event: {} {} {} {} {}", [event.params.name, event.params.symbol, event.params.decimals.toString(), event.params.currency.toHexString(), event.params.chainId.toString()])
-    let indexAssetEntity = createOrLoadIndexAssetEntity(indexAddress, event.params.currency, event.params.chainId)
-    let chainIDToAssetMappingEntity = createOrLoadChainIDToAssetMappingEntity(indexAddress, event.params.chainId)
+    let chainID = dataSource.context().getBigInt('chainID')
+    log.debug("Currency registered event: {} {} {} {} {}", [event.params.name, event.params.symbol, event.params.decimals.toString(), event.params.currency.toHexString(), chainID.toString()])
+    let indexAssetEntity = createOrLoadIndexAssetEntity(indexAddress, event.params.currency, chainID)
+    let chainIDToAssetMappingEntity = createOrLoadChainIDToAssetMappingEntity(indexAddress, chainID)
     indexAssetEntity.name = event.params.name
     indexAssetEntity.symbol = event.params.symbol
     indexAssetEntity.decimals = event.params.decimals
@@ -55,7 +56,8 @@ export function handleFinishChainRebalancing(event: FinishVaultRebalancingEvent)
     let indexAddress = dataSource.context().getBytes('indexAddress')
     let reserveAsset = dataSource.context().getBytes('reserveAsset')
     let indexEntity = createOrLoadIndexEntity(indexAddress)
-    let chainIDToAssetMappingEntity = createOrLoadChainIDToAssetMappingEntity(indexAddress, event.params.chainId)
+    let chainID = dataSource.context().getBigInt('chainID')
+    let chainIDToAssetMappingEntity = createOrLoadChainIDToAssetMappingEntity(indexAddress, chainID)
     chainIDToAssetMappingEntity.latestSnapshot = event.params.snapshot
     if (event.params.currencies.length == 0) {
         for (let i = 0; i < chainIDToAssetMappingEntity.assets.length; i++) {
@@ -65,13 +67,13 @@ export function handleFinishChainRebalancing(event: FinishVaultRebalancingEvent)
             indexAssetEntity.save()
         }
         let emptyAssetArray: string[] = []
-        if (event.params.chainId == indexEntity.chainID) {
+        if (chainID == indexEntity.chainID) {
             emptyAssetArray.push(createOrLoadIndexAssetEntity(indexAddress, reserveAsset, indexEntity.chainID).id)
         }
         chainIDToAssetMappingEntity.assets = emptyAssetArray
         chainIDToAssetMappingEntity.save()
 
-        if (event.params.chainId != indexEntity.chainID) {
+        if (chainID != indexEntity.chainID) {
             let indexAssets = indexEntity.assets
             let idx = indexAssets.indexOf(chainIDToAssetMappingEntity.id)
             indexAssets.splice(idx, 1)
@@ -82,14 +84,15 @@ export function handleFinishChainRebalancing(event: FinishVaultRebalancingEvent)
     } else {
         let chainIDAssetArray: string[] = []
         let reserveAssetEntity = createOrLoadIndexAssetEntity(indexAddress, reserveAsset, indexEntity.chainID)
-        if (event.params.chainId == indexEntity.chainID) {
+        if (chainID == indexEntity.chainID) {
             reserveAssetEntity.balance = BigDecimal.zero()
             reserveAssetEntity.save()
             chainIDAssetArray.push(reserveAssetEntity.id)
         }
         for (let i = 0; i < event.params.currencies.length; i++) {
-            let balance = new BigDecimal(event.params.currencies[i].rightShift(160))
-            let asset = event.params.currencies[i].bitAnd(BigInt.fromI32(2).pow(160).minus(BigInt.fromI32(1))).toHex()
+            // let balance = new BigDecimal(event.params.currencies[i].rightShift(160))
+            let balance = new BigDecimal(event.params.balances[i])
+            let asset = event.params.currencies[i].toString()
             log.debug("{}", [asset])
             let assetConverted: Bytes
             log.debug("{} length = {}", [asset, asset.length.toString()])
@@ -99,8 +102,8 @@ export function handleFinishChainRebalancing(event: FinishVaultRebalancingEvent)
             else {
                 assetConverted = Address.fromHexString('0x'.concat("0".repeat(42 - asset.length)).concat(asset.slice(2)))
             }
-            log.debug("decoded asset = {}, decoded balance {}, chainID {}", [assetConverted.toHexString(), balance.toString(), event.params.chainId.toString()])
-            let indexAssetEntity = createOrLoadIndexAssetEntity(indexAddress, assetConverted, event.params.chainId)
+            log.debug("decoded asset = {}, decoded balance {}, chainID {}", [assetConverted.toHexString(), balance.toString(), chainID.toString()])
+            let indexAssetEntity = createOrLoadIndexAssetEntity(indexAddress, assetConverted, chainID)
             let scalar = new BigDecimal(BigInt.fromI32(10).pow(u8(indexAssetEntity.decimals)))
             indexAssetEntity.balance = balance.div(scalar)
             indexAssetEntity.save()
@@ -134,16 +137,6 @@ export function handleFinishChainRebalancing(event: FinishVaultRebalancingEvent)
     saveHistoricalData(indexAddress, event.block.timestamp)
 }
 
-export function handleRegisterChain(event: RegisterChainEvent): void {
-    let indexAddress = dataSource.context().getBytes('indexAddress')
-    let chainIDToAssetMappingEntity = createOrLoadChainIDToAssetMappingEntity(indexAddress, event.params.chainId)
-    chainIDToAssetMappingEntity.chainIndex = event.params.chainIndex
-    chainIDToAssetMappingEntity.latestSnapshot = BigInt.zero()
-    chainIDToAssetMappingEntity.registeredAssets = BigInt.zero()
-    chainIDToAssetMappingEntity.save()
-
-}
-
 export function saveHistoricalData(index: Bytes, timestamp: BigInt): void {
     let indexEntity = createOrLoadIndexEntity(index)
     let historicalIndexBalanceEntity = createOrLoadHistoricalIndexBalanceEntity(index, timestamp)
@@ -173,21 +166,15 @@ export function handleFinishRebalancing(event: FinishRebalancingEvent): void {
     let indexEntity = createOrLoadIndexEntity(indexAddress)
     let anatomyEntity = createOrLoadAnatomyEntity(indexAddress)
     let anatomyArray: string[] = []
-    let chainIndexArray = convertBitSetToIDs(convertBigIntsToBitArray(event.params.newAnatomy.chainIdSet))
-    log.debug(" chain index array {}", [chainIndexArray.toString()])
+    let chainID = dataSource.context().getBigInt('chainID')
     let count = 0
-    for (let i = 0; i < chainIndexArray.length; i++) {
-        let currencySetEntity = createOrLoadCurrencySetEntity(indexAddress, chainIndexArray[i])
-        currencySetEntity.sets = event.params.newAnatomy.currencyIdSets[i]
-        currencySetEntity.save()
-        anatomyArray.push(currencySetEntity.id)
+   
 
-        let currencyIndexArray = convertBitSetToIDs(convertBigIntsToBitArray(event.params.newAnatomy.currencyIdSets[i]))
-        log.debug("Currency index array output {} for chain index {}", [currencyIndexArray.toString(), chainIndexArray[i].toString()])
+        let currencyIndexArray = convertBitSetToIDs(convertBigIntsToBitArray(event.params.newCurrencyIdSet))
+        log.debug("Currency index array output {} for chain index {}", [currencyIndexArray.toString(), chainID.toString()])
         for (let y = 0; y < indexEntity.assets.length; y++) {
             let chainIDToAssetMappingEntity = loadChainIDToAssetMappingEntity(indexEntity.assets[y])
             let chainIndex = chainIDToAssetMappingEntity.chainIndex
-            if (chainIndex && chainIndex == chainIndexArray[i]) {
                 while (currencyIndexArray.length > 0) {
                     for (let x = 0; x < chainIDToAssetMappingEntity.assets.length; x++) {
                         let indexAssetEntity = loadIndexAssetEntity(chainIDToAssetMappingEntity.assets[x])
@@ -206,11 +193,9 @@ export function handleFinishRebalancing(event: FinishRebalancingEvent): void {
                     }
                 }
                 break
-            }
         }
-    }
     indexEntity.isRebalancing = false
-    anatomyEntity.chainIdSet = event.params.newAnatomy.chainIdSet
+    anatomyEntity.chainIdSet = [chainID]
     anatomyEntity.currencyIdSets = anatomyArray
     anatomyEntity.save()
     indexEntity.save()

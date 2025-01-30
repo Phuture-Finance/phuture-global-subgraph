@@ -1,5 +1,5 @@
 import { DataSourceContext, dataSource } from "@graphprotocol/graph-ts"
-import { ConfigBuilderV3 as ConfigBuilderTemplate } from "../../generated/templates/ConfigBuilderV3/ConfigBuilderV3"
+import { ConfigBuilderV3 as ConfigBuilderTemplate } from "../../generated/templates"
 import { SetConfigBuilder as SetConfigbuilderEvent } from "../../generated/templates/AutoGovernanceV3/AutoGovernanceV3"
 
 
