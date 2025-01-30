@@ -1,8 +1,10 @@
-import { Deposit as DepositEvent, FeeAccrued, Withdraw as WithdrawEvent } from "../../generated/templates/IndexTokenV3/IndexTokenV3"
+import { ConfigBuilderV3 as ConfigBuilderTemplate } from "../../generated/templates"
+import { Deposit as DepositEvent, FeeAccrued, Withdraw as WithdrawEvent, SetConfigBuilder as SetConfigbuilderEvent } from "../../generated/templates/IndexTokenV3/IndexTokenV3"
 import { createOrLoadIndexEntity, createOrLoadIndexAssetEntity, loadIndexAssetEntity, loadChainIDToAssetMappingEntity } from "../EntityCreation"
-import { BigDecimal, Bytes, Address, BigInt, dataSource, log } from "@graphprotocol/graph-ts"
-export { handleTransfer } from "../v1/IndexToken"
+import { BigDecimal, BigInt, dataSource, DataSourceContext } from "@graphprotocol/graph-ts"
 import { saveHistoricalData } from "./ConfigBuilder"
+
+export { handleTransfer } from "../v1/IndexToken"
 
 export function handleDeposit(event: DepositEvent): void {
     let indexEntity = createOrLoadIndexEntity(event.address)
@@ -50,4 +52,13 @@ export function handleFeeAccrued(event: FeeAccrued): void {
     fees = fees.div(scalar)
     indexEntity.totalFees = indexEntity.totalFees!.plus(fees)
     indexEntity.save()
+}
+
+export function handleSetConfigBuilder(event: SetConfigbuilderEvent): void {
+    let indexAddress = dataSource.context().getBytes('indexAddress')
+    let reserveAsset = dataSource.context().getBytes('reserveAsset')
+    let context = new DataSourceContext()
+    context.setBytes('indexAddress', indexAddress)
+    context.setBytes('reserveAsset', reserveAsset)
+    ConfigBuilderTemplate.createWithContext(event.params.configBuilder, context)
 }

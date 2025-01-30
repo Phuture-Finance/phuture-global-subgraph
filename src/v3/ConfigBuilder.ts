@@ -1,9 +1,7 @@
-import { Bytes, BigInt, Address, ethereum, dataSource, BigDecimal, log, ByteArray, TypedMap, DataSourceContext } from "@graphprotocol/graph-ts";
-import { createOrLoadAnatomyEntity, createOrLoadChainIDToAssetMappingEntity, createOrLoadConfigEntity, createOrLoadCurrencySetEntity, createOrLoadHistoricalIndexAssetEntity, createOrLoadHistoricalIndexBalanceEntity, createOrLoadIndexAssetEntity, createOrLoadIndexEntity, loadChainIDToAssetMappingEntity, loadIndexAssetEntity } from "../EntityCreation";
+import { Bytes, BigInt, Address, ethereum, dataSource, BigDecimal, log } from "@graphprotocol/graph-ts";
+import { createOrLoadAnatomyEntity, createOrLoadChainIDToAssetMappingEntity, createOrLoadConfigEntity, createOrLoadHistoricalIndexAssetEntity, createOrLoadHistoricalIndexBalanceEntity, createOrLoadIndexAssetEntity, createOrLoadIndexEntity, loadChainIDToAssetMappingEntity, loadIndexAssetEntity } from "../EntityCreation";
 import { ConfigUpdated as ConfigUpdatedEvent, CurrencyRegistered as CurrencyRegisteredEvent, FinishVaultRebalancing as FinishVaultRebalancingEvent, FinishRebalancing as FinishRebalancingEvent, StartRebalancing as StartRebalancingEvent } from "../../generated/templates/ConfigBuilderV3/ConfigBuilderV3"
 import { convertAUMFeeRate } from "../v1/FeePool";
-import { CurrencySet, HistoricalIndexAsset } from "../../generated/schema";
-import { Messenger } from "../../generated/templates";
 
 export function handleConfigUpdate(event: ConfigUpdatedEvent): void {
     let indexAddress = dataSource.context().getBytes('indexAddress')
@@ -167,32 +165,31 @@ export function handleFinishRebalancing(event: FinishRebalancingEvent): void {
     let anatomyArray: string[] = []
     let chainID = dataSource.context().getBigInt('chainID')
     let count = 0
-   
 
-        let currencyIndexArray = convertBitSetToIDs(convertBigIntsToBitArray(event.params.newCurrencyIdSet))
-        log.debug("Currency index array output {} for chain index {}", [currencyIndexArray.toString(), chainID.toString()])
-        for (let y = 0; y < indexEntity.assets.length; y++) {
-            let chainIDToAssetMappingEntity = loadChainIDToAssetMappingEntity(indexEntity.assets[y])
-            let chainIndex = chainIDToAssetMappingEntity.chainIndex
-                while (currencyIndexArray.length > 0) {
-                    for (let x = 0; x < chainIDToAssetMappingEntity.assets.length; x++) {
-                        let indexAssetEntity = loadIndexAssetEntity(chainIDToAssetMappingEntity.assets[x])
-                        let currencyID = indexAssetEntity.currencyID
-                        if (currencyIndexArray.length == 0) {
-                            break
-                        }
-                        if (currencyID && currencyID == currencyIndexArray[0]) {
-                            indexAssetEntity.weight = event.params.weights[count]
-                            currencyIndexArray.splice(0, 1)
-                            indexAssetEntity.save()
-                            count++
-                            log.debug("currency array length {}", [currencyIndexArray.length.toString()])
-                            log.debug("count {}", [count.toString()])
-                        }
-                    }
+    let currencyIndexArray = convertBitSetToIDs(convertBigIntsToBitArray(event.params.newCurrencyIdSet))
+    log.debug("Currency index array output {} for chain index {}", [currencyIndexArray.toString(), chainID.toString()])
+    for (let y = 0; y < indexEntity.assets.length; y++) {
+        let chainIDToAssetMappingEntity = loadChainIDToAssetMappingEntity(indexEntity.assets[y])
+        let chainIndex = chainIDToAssetMappingEntity.chainIndex
+        while (currencyIndexArray.length > 0) {
+            for (let x = 0; x < chainIDToAssetMappingEntity.assets.length; x++) {
+                let indexAssetEntity = loadIndexAssetEntity(chainIDToAssetMappingEntity.assets[x])
+                let currencyID = indexAssetEntity.currencyID
+                if (currencyIndexArray.length == 0) {
+                    break
                 }
-                break
+                if (currencyID && currencyID == currencyIndexArray[0]) {
+                    indexAssetEntity.weight = event.params.weights[count]
+                    currencyIndexArray.splice(0, 1)
+                    indexAssetEntity.save()
+                    count++
+                    log.debug("currency array length {}", [currencyIndexArray.length.toString()])
+                    log.debug("count {}", [count.toString()])
+                }
+            }
         }
+        break
+    }
     indexEntity.isRebalancing = false
     anatomyEntity.chainIdSet = [chainID]
     anatomyEntity.currencyIdSets = anatomyArray
@@ -222,48 +219,4 @@ export function convertBigIntsToBitArray(array: BigInt[]): BigInt[] {
         expandedBitArray = expandedBitArray.concat(bitArray)
     }
     return expandedBitArray
-}
-
-
-
-export function selectNativeAsset(chainID: BigInt): Array<string> | null {
-    let chainIDMap = new TypedMap<BigInt, Array<string>>()
-    chainIDMap.set(BigInt.fromI32(43114), ["Avalanche", "AVAX", "18"])
-    chainIDMap.set(BigInt.fromI32(43113), ["Avalanche", "AVAX", "18"])
-    chainIDMap.set(BigInt.fromI32(80001), ["Matic", "MATIC", "18"])
-    chainIDMap.set(BigInt.fromI32(137), ["Matic", "MATIC", "18"])
-    chainIDMap.set(BigInt.fromI32(97), ["Binance Coin", "BNB", "18"])
-    chainIDMap.set(BigInt.fromI32(56), ["Binance Coin", "BNB", "18"])
-    chainIDMap.set(BigInt.fromI32(1), ["Ethereum", "ETH", "18"])
-    chainIDMap.set(BigInt.fromI32(42161), ["Ethereum", "ETH", "18"])
-    chainIDMap.set(BigInt.fromI32(10), ["Ethereum", "ETH", "18"])
-    chainIDMap.set(BigInt.fromI32(8453), ["Ethereum", "ETH", "18"])
-    chainIDMap.set(BigInt.fromI32(100), ["XDAI", "XDAI", "18"])
-    chainIDMap.set(BigInt.fromI32(10200), ["XDAI", "XDAI", "18"])
-    chainIDMap.set(BigInt.fromI32(5000), ["Mantle", "MNT", "18"])
-    chainIDMap.set(BigInt.fromI32(250), ["Fantom", "FTM", "18"])
-    chainIDMap.set(BigInt.fromI32(4002), ["Fantom", "FTM", "18"])
-    chainIDMap.set(BigInt.fromI32(1088), ["Metis", "METIS", "18"])
-    chainIDMap.set(BigInt.fromI32(59144), ["Ethereum", "ETH", "18"])
-    chainIDMap.set(BigInt.fromI32(40), ["Telos", "TLOS", "18"])
-    chainIDMap.set(BigInt.fromI32(1313161554), ["Ethereum", "ETH", "18"])
-    chainIDMap.set(BigInt.fromI32(204), ["Binance Coin", "BNB", "18"])
-    chainIDMap.set(BigInt.fromI32(41), ["Telos", "TLOS", "18"])
-    chainIDMap.set(BigInt.fromI32(5003), ["Mantle", "MNT", "18"])
-    chainIDMap.set(BigInt.fromI32(84532), ["Ethereum", "ETH", "18"])
-    chainIDMap.set(BigInt.fromI32(421614), ["Ethereum", "ETH", "18"])
-    chainIDMap.set(BigInt.fromI32(11155111), ["Ethereum", "ETH", "18"])
-    chainIDMap.set(BigInt.fromI32(11155420), ["Ethereum", "ETH", "18"])
-    chainIDMap.set(BigInt.fromI32(7700), ["Canto", "CANTO", "18"])
-    chainIDMap.set(BigInt.fromI32(59140), ["Ethereum", "ETH", "18"])
-    chainIDMap.set(BigInt.fromI32(5611), ["Binance Coin", "tBNB", "18"])
-
-    let data = chainIDMap.get(chainID)
-
-    if (data != null) {
-        return data
-    }
-    else {
-        return null
-    }
 }

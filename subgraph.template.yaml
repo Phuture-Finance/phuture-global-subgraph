@@ -122,8 +122,6 @@ dataSources:
           file: ./abis/v3/IndexFactoryV3.json
         - name: IndexTokenV3
           file: ./abis/v3/IndexTokenV3.json
-        - name: AutoGovernance
-          file: ./abis/v3/AutoGovernanceV3.json
         - name: ERC20
           file: ./abis/ERC20.json
         - name: MakerERC20
@@ -488,6 +486,8 @@ templates:
           handler: handleFeeAccrued
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
+        - event: SetConfigBuilder(address)
+          handler: handleSetConfigBuilder
       file: ./src/v3/IndexToken.ts
   - kind: ethereum
     name: ConfigBuilderV3
@@ -516,25 +516,5 @@ templates:
         - event: StartRebalancing()
           handler: handleStartRebalancing
       file: ./src/v3/ConfigBuilder.ts
-  - kind: ethereum
-    name: AutoGovernanceV3
-    network: {{network}}
-    source:
-      abi: AutoGovernanceV3
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities: 
-        - Index
-      abis: 
-        - name: AutoGovernanceV3
-          file: ./abis/v3/AutoGovernanceV3.json
-        - name: ConfigBuilderV3
-          file: ./abis/v3/ConfigBuilderV3.json
-      eventHandlers:
-        - event: SetConfigBuilder(address)
-          handler: handleSetConfigBuilder
-      file: ./src/v3/Governance.ts
-  
+
 {{/v3}}
