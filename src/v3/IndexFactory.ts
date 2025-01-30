@@ -20,7 +20,7 @@ export function handleIndexDeployed(event: DeployedEvent): void {
     index.symbol = event.params.symbol
     index.decimals = indexContract.decimals()
     index.chainID = chainID
-    index.version = "v2"
+    index.version = "v3"
     index.creationDate = event.block.timestamp
     index.k = BigInt.fromI32(1).times(BigInt.fromI32(10).pow(18))
     index.totalFees = BigDecimal.zero()

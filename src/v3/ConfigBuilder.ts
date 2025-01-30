@@ -90,7 +90,6 @@ export function handleFinishChainRebalancing(event: FinishVaultRebalancingEvent)
             chainIDAssetArray.push(reserveAssetEntity.id)
         }
         for (let i = 0; i < event.params.currencies.length; i++) {
-            // let balance = new BigDecimal(event.params.currencies[i].rightShift(160))
             let balance = new BigDecimal(event.params.balances[i])
             let asset = event.params.currencies[i].toString()
             log.debug("{}", [asset])
