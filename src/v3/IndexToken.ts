@@ -4,7 +4,7 @@ import {
 	dataSource,
 } from "@graphprotocol/graph-ts";
 import { ConfigBuilderV3 as ConfigBuilderTemplate } from "../../generated/templates";
-import type {
+import {
 	Deposit as DepositEvent,
 	FeeAccrued,
 	SetConfigBuilder as SetConfigbuilderEvent,
@@ -104,10 +104,13 @@ export function handleSetConfigBuilder(event: SetConfigbuilderEvent): void {
 	const indexContext = dataSource.context();
 	const indexAddress = indexContext.getBytes("indexAddress");
 	const reserveAsset = indexContext.getBytes("reserveAsset");
+	const chainID = indexContext.getBigInt("chainID");
 
 	const configBuilderContext = new DataSourceContext();
-	indexContext.setBytes("indexAddress", indexAddress);
-	indexContext.setBytes("reserveAsset", reserveAsset);
+	configBuilderContext.setBytes("indexAddress", indexAddress);
+	configBuilderContext.setBytes("reserveAsset", reserveAsset);
+	configBuilderContext.setBigInt("chainID", chainID);
+	
 	ConfigBuilderTemplate.createWithContext(
 		event.params.configBuilder,
 		configBuilderContext,

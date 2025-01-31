@@ -2,12 +2,13 @@ import {
 	Address,
 	BigDecimal,
 	BigInt,
-	type Bytes,
+	Bytes,
 	dataSource,
 	ethereum,
+	log,
 } from "@graphprotocol/graph-ts";
 
-import type {
+import  {
 	ConfigUpdated as ConfigUpdatedEvent,
 	CurrencyRegistered as CurrencyRegisteredEvent,
 	FinishRebalancing as FinishRebalancingEvent,
@@ -30,7 +31,10 @@ import { BP, ONE, TEN, WAD, ZERO } from "../constants";
 import { convertAUMFeeRate } from "../v1/FeePool";
 
 export function handleConfigUpdate(event: ConfigUpdatedEvent): void {
+	log.info("1 TEST LOG: ",['HERE'])
+	// log.debug("Currency registered event: {} {} {} {} {}", [event.params.name, event.params.symbol, event.params.decimals.toString(), event.params.currency.toHexString(), event.params.chainId.toString()])
 	const indexAddress = dataSource.context().getBytes("indexAddress");
+	log.info("2 TEST LOG: ",[indexAddress.toString()])
 	const indexEntity = createOrLoadIndexEntity(indexAddress);
 	const configEntity = createOrLoadConfigEntity(indexAddress);
 	const decoded = ethereum
@@ -69,8 +73,9 @@ export function handleStartRebalancing(event: StartRebalancingEvent): void {
 }
 
 export function handleCurrencyRegistered(event: CurrencyRegisteredEvent): void {
-	const indexAddress = dataSource.context().getBytes("indexAddress");
-	const chainID = dataSource.context().getBigInt("chainID");
+	const builderContext = dataSource.context()
+	const indexAddress = builderContext.getBytes("indexAddress");
+	const chainID = builderContext.getBigInt("chainID");
 
 	const indexAssetEntity = createOrLoadIndexAssetEntity(
 		indexAddress,

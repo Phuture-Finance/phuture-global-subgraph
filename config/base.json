@@ -1,31 +1,22 @@
 {
-    "network": "base",
-    "chainID": 8453,
-    "v1": false,
-    "v2": {
-        "indexFactory": [
-            {
-                "name": "CookieTestFactory",
-                "address": "0x91318C0675df6be2AA16A420cCC22705C66b37De",
-                "startBlock": 25377665,
-                "nativeAsset": {
-                    "name": "Ethereum",
-                    "symbol": "ETH",
-                    "decimals": 18
-                }
-            },
-            {
-                "name": "JMXFactory",
-                "address": "0xb1E88fd8cC0bcfCaB479f7DDDb8e972a52c62Dfd",
-                "startBlock": 25386107,
-                "nativeAsset": {
-                    "name": "Ethereum",
-                    "symbol": "ETH",
-                    "decimals": 18
-                }
-            }
-        ]
-    },
-    "ephtr": false,
-    "savingsVaults": false
-}   
+  "network": "base",
+  "chainID": 8453,
+  "v1": false,
+  "v2": false,
+  "v3": {
+    "indexFactory": [
+      {
+        "name": "JMXFactoryProd",
+        "address": "0x9c5816bd3B4C360427EFC5FCbFB82A60C8c279F8",
+        "startBlock": 25771303,
+        "nativeAsset": {
+          "name": "Ethereum",
+          "symbol": "ETH",
+          "decimals": 18
+        }
+      }
+    ]
+  },
+  "ephtr": false,
+  "savingsVaults": false
+}

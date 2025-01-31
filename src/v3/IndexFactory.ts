@@ -5,7 +5,7 @@ import {
 	dataSource,
 } from "@graphprotocol/graph-ts";
 
-import type { Deployed as DeployedEvent } from "../../generated/IndexFactoryV3/IndexFactoryV3";
+import  { Deployed as DeployedEvent } from "../../generated/IndexFactoryV3/IndexFactoryV3";
 import { IndexTokenV3 as indexTemplate } from "../../generated/templates";
 import {
 	createOrLoadChainIDToAssetMappingEntity,
@@ -17,13 +17,15 @@ import { ONE, WAD, ZERO } from "../constants";
 import { getTokenInfo } from "../v1/IndexFactory";
 
 export function handleIndexDeployed(event: DeployedEvent): void {
+	const indexFactoryContext = dataSource.context();
+	const chainID = indexFactoryContext.getBigInt("chainID");
+
 	const indexContext = new DataSourceContext();
 	indexContext.setBytes("reserveAsset", event.params.reserve);
 	indexContext.setBytes("indexAddress", event.params.index);
+	indexContext.setBigInt("chainID", chainID);
 	indexTemplate.createWithContext(event.params.index, indexContext);
-
-	const indexFactoryContext = dataSource.context();
-	const chainID = indexFactoryContext.getBigInt("chainID");
+	
 	const index = createOrLoadIndexEntity(event.params.index);
 	index.name = event.params.name;
 	index.symbol = event.params.symbol;
