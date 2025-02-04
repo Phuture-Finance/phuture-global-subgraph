@@ -1,14 +1,13 @@
 import {
-	Address,
 	BigDecimal,
 	BigInt,
 	Bytes,
 	dataSource,
 	ethereum,
-	log,
+	log
 } from "@graphprotocol/graph-ts";
 
-import  {
+import {
 	ConfigUpdated as ConfigUpdatedEvent,
 	CurrencyRegistered as CurrencyRegisteredEvent,
 	FinishRebalancing as FinishRebalancingEvent,
@@ -28,14 +27,11 @@ import {
 	loadIndexAssetEntity,
 } from "../EntityCreation";
 
-import { ADDRESS_LENGTH, BP, ONE, TEN, WAD, ZERO } from "../constants";
+import { BP, ONE, TEN, WAD, ZERO } from "../constants";
 import { convertAUMFeeRate } from "../v1/FeePool";
 
 export function handleConfigUpdate(event: ConfigUpdatedEvent): void {
-	log.info("1 TEST LOG: ",['HERE'])
-	// log.debug("Currency registered event: {} {} {} {} {}", [event.params.name, event.params.symbol, event.params.decimals.toString(), event.params.currency.toHexString(), event.params.chainId.toString()])
 	const indexAddress = dataSource.context().getBytes("indexAddress");
-	log.info("2 TEST LOG: ",[indexAddress.toString()])
 	const indexEntity = createOrLoadIndexEntity(indexAddress);
 	const configEntity = createOrLoadConfigEntity(indexAddress);
 	const decoded = ethereum
@@ -73,22 +69,6 @@ export function handleStartRebalancing(event: StartRebalancingEvent): void {
 	indexEntity.save();
 }
 
-// export function handleCurrencyRegistered(event: CurrencyRegisteredEvent): void {
-// 	let indexAddress = dataSource.context().getBytes('indexAddress')
-// 	log.debug("Currency registered event: {} {} {} {} {}", [event.params.name, event.params.symbol, event.params.decimals.toString(), event.params.currency.toHexString(), event.params.chainId.toString()])
-// 	let indexAssetEntity = createOrLoadIndexAssetEntity(indexAddress, event.params.currency, event.params.chainId)
-// 	let chainIDToAssetMappingEntity = createOrLoadChainIDToAssetMappingEntity(indexAddress, event.params.chainId)
-// 	indexAssetEntity.name = event.params.name
-// 	indexAssetEntity.symbol = event.params.symbol
-// 	indexAssetEntity.decimals = event.params.decimals
-// 	indexAssetEntity.currencyID = chainIDToAssetMappingEntity.registeredAssets
-
-// 	chainIDToAssetMappingEntity.registeredAssets = chainIDToAssetMappingEntity.registeredAssets!.plus(BigInt.fromI32(1))
-
-// 	chainIDToAssetMappingEntity.save()
-// 	indexAssetEntity.save()
-// }
-
 export function handleCurrencyRegistered(event: CurrencyRegisteredEvent): void {
 	const builderContext = dataSource.context()
 	const indexAddress = builderContext.getBytes("indexAddress");
@@ -112,7 +92,7 @@ export function handleCurrencyRegistered(event: CurrencyRegisteredEvent): void {
 	chainIDToAssetMappingEntity.registeredAssets =
 		chainIDToAssetMappingEntity.registeredAssets!.plus(ONE);
 
-	log.debug('CurrencyRegisteredEvent chainIDToAssetMappingEntity: ',[chainIDToAssetMappingEntity.assets.join('-')])
+	log.debug('CurrencyRegisteredEvent chainIDToAssetMappingEntity: ', [chainIDToAssetMappingEntity.assets.join('-')])
 	chainIDToAssetMappingEntity.save();
 	indexAssetEntity.save();
 }
@@ -129,9 +109,6 @@ export function handleFinishChainRebalancing(
 		chainID,
 	);
 	chainIDToAssetMappingEntity.latestSnapshot = event.params.snapshot;
-	log.debug('FinishVaultRebalancingEvent indexEntity.assets: {} , event.params.currencies: {}',[indexEntity.assets.join('-'),event.params.currencies.join('-')])
-	log.debug('FinishVaultRebalancingEvent chainIDToAssetMappingEntity.assets: {}',[chainIDToAssetMappingEntity.assets.join('-')])
-	log.debug('FinishVaultRebalancingEvent T/F = {}',[event.params.currencies.length ===0?'true':'false'])
 	if (event.params.currencies.length == 0) {
 		for (let i = 0; i < chainIDToAssetMappingEntity.assets.length; i++) {
 			const indexAssetEntity = loadIndexAssetEntity(
@@ -154,13 +131,11 @@ export function handleFinishChainRebalancing(
 		chainIDToAssetMappingEntity.assets = emptyAssetArray;
 		chainIDToAssetMappingEntity.save();
 
-		// if (chainID != indexEntity.chainID) {
-			const indexAssets = indexEntity.assets;
-			const idx = indexAssets.indexOf(chainIDToAssetMappingEntity.id);
-			indexAssets.splice(idx, 1);
-			indexEntity.assets = indexAssets;
-			indexEntity.save();
-		// }
+		const indexAssets = indexEntity.assets;
+		const idx = indexAssets.indexOf(chainIDToAssetMappingEntity.id);
+		indexAssets.splice(idx, 1);
+		indexEntity.assets = indexAssets;
+		indexEntity.save();
 	} else {
 		const chainIDAssetArray: string[] = [];
 		const reserveAssetEntity = createOrLoadIndexAssetEntity(
@@ -176,16 +151,7 @@ export function handleFinishChainRebalancing(
 		for (let i = 0; i < event.params.currencies.length; i++) {
 			const balance = new BigDecimal(event.params.balances[i]);
 			const asset = event.params.currencies[i];
-			log.warning('FinishVaultRebalancingEvent currencies[i] = {}',[asset.toHexString()])
-			// if (asset.length == 3) {
-			// 	assetConverted = Address.fromString(
-			// 		"0x0000000000000000000000000000000000000000",
-			// 	);
-			// } else {
-			// 	assetConverted = Address.fromHexString(
-			// 		"0x".concat("0".repeat(42 - asset.length)).concat(asset.slice(2)),
-			// 	);
-			// }
+			log.warning('FinishVaultRebalancingEvent currencies[i] = {}', [asset.toHexString()])
 			const indexAssetEntity = createOrLoadIndexAssetEntity(
 				indexAddress,
 				asset,
@@ -193,14 +159,11 @@ export function handleFinishChainRebalancing(
 			);
 			const scalar = new BigDecimal(TEN.pow(u8(indexAssetEntity.decimals)));
 			indexAssetEntity.balance = balance.div(scalar);
-			// indexAssetEntity.asset = asset
 			indexAssetEntity.save();
 			if (indexAssetEntity.id != reserveAssetEntity.id) {
 				chainIDAssetArray.push(indexAssetEntity.id);
 			}
 		}
-		log.error('chainIDAssetArray = {}', [chainIDAssetArray.join('-')])
-		log.error('chainIDToAssetMappingEntity = {}', [chainIDToAssetMappingEntity.assets.join('-')])
 		for (let i = 0; i < chainIDToAssetMappingEntity.assets.length; i++) {
 			const id = chainIDToAssetMappingEntity.assets[i];
 			if (!chainIDAssetArray.includes(id)) {
@@ -210,15 +173,13 @@ export function handleFinishChainRebalancing(
 				indexAssetEntity.save();
 			}
 		}
-		log.debug('FinishVaultRebalancingEvent chainIDToAssetMappingEntity.assets: {}',[chainIDToAssetMappingEntity.assets.join('-')])
 		chainIDToAssetMappingEntity.assets = chainIDAssetArray;
 		chainIDToAssetMappingEntity.save();
 
-		log.debug('FinishVaultRebalancingEvent chainIDToAssetMappingEntity.id == {} ',[chainIDToAssetMappingEntity.id])
 		if (!indexEntity.assets.includes(chainIDToAssetMappingEntity.id)) {
 			const indexAssetArray = indexEntity.assets;
 			indexAssetArray.push(chainIDToAssetMappingEntity.id);
-			log.debug('indexAssetArray: {}',[indexAssetArray.join('-')])
+			log.debug('indexAssetArray: {}', [indexAssetArray.join('-')])
 			indexEntity.assets = indexAssetArray;
 			indexEntity.save();
 		}
@@ -264,54 +225,6 @@ export function saveHistoricalData(index: Bytes, timestamp: BigInt): void {
 	historicalIndexBalanceEntity.save();
 }
 
-// export function handleFinishRebalancing(event: FinishRebalancingEvent): void {
-// 	log.error("weights {}", [event.params.weights.toString()])
-// 	log.error("newCurrencyIdSet {}", [event.params.newCurrencyIdSet.toString()])
-
-// 	const builderContext = dataSource.context()
-// 	let indexAddress = builderContext.getBytes('indexAddress')
-// 	// let chainID = builderContext.getBigInt('chainID')
-
-// 	// update index
-// 	let indexEntity = createOrLoadIndexEntity(indexAddress)
-// 	indexEntity.isRebalancing = false
-// 	indexEntity.save()
-
-// 	// update currencySet
-// 	let currencySetEntity = createOrLoadCurrencySetEntity(indexAddress, ZERO)
-// 	currencySetEntity.sets = event.params.newCurrencyIdSet
-// 	currencySetEntity.save()
-
-// 	// update asset weights
-// 	let count = 0
-// 	let currencyIndexArray = convertBitSetToIDs(convertBigIntsToBitArray(event.params.newCurrencyIdSet))
-// 	log.error("currencyIndexArray {}", [currencyIndexArray.toString()])
-// 	// let chainIDToAssetMappingEntity = createOrLoadChainIDToAssetMappingEntity(indexAddress, chainID)
-// 	let chainIDToAssetMappingEntity = loadChainIDToAssetMappingEntity(indexEntity.assets[0])
-							
-// 	while (currencyIndexArray.length > 0) {
-// 		for (let x = 0; x < chainIDToAssetMappingEntity.assets.length; x++) {
-// 			// let indexAssetEntity = loadChainIDToAssetMappingEntity(chainIDToAssetMappingEntity.assets[0])
-// 			let indexAssetEntity = loadIndexAssetEntity(chainIDToAssetMappingEntity.assets[x])
-// 			let currencyID = indexAssetEntity.currencyID
-// 			if (currencyIndexArray.length == 0) {
-// 				break
-// 			}
-// 			if (currencyID && currencyID == currencyIndexArray[0]) {
-// 				indexAssetEntity.weight = event.params.weights[count]
-// 				currencyIndexArray.splice(0, 1)
-// 				indexAssetEntity.save()
-// 				count++
-// 			}
-// 		}
-// 	}
-
-// 	// update anatomy
-// 	let anatomyEntity = createOrLoadAnatomyEntity(indexAddress)
-// 	anatomyEntity.currencyIdSets = [currencySetEntity.id]
-// 	anatomyEntity.save()
-// }
-
 export function handleFinishRebalancing(event: FinishRebalancingEvent): void {
 	log.error("weights {}", [event.params.weights.toString()])
 	let indexAddress = dataSource.context().getBytes('indexAddress')
@@ -320,50 +233,19 @@ export function handleFinishRebalancing(event: FinishRebalancingEvent): void {
 	let anatomyEntity = createOrLoadAnatomyEntity(indexAddress)
 	let anatomyArray: string[] = []
 	let chainIndexArray = [chainID]
-	// let chainIndexArray = [ZERO]
-	log.error(" chain index array {}", [chainIndexArray.toString()])
-	// let count = 0
 	for (let i = 0; i < chainIndexArray.length; i++) {
 		let currencySetEntity = createOrLoadCurrencySetEntity(indexAddress, chainIndexArray[i])
 		currencySetEntity.sets = [event.params.newCurrencyIdSet[i]]
 		currencySetEntity.save()
 		anatomyArray.push(currencySetEntity.id)
+		let chainIDToAssetMappingEntity = createOrLoadChainIDToAssetMappingEntity(indexAddress, chainID)
 
-		// let currencyIndexArray = [event.params.newCurrencyIdSet[i]]
-		log.error('indexEntity.assets: {} ',[indexEntity.assets.join('-')])
-		log.error('indexEntity ASSET 1: {} ',[indexEntity.assets[0].toString()])
-		// log.error('indexEntity ASSET 2: {} ',[indexEntity.assets[2].toString()])
-		// for (let y = 0; y < indexEntity.assets.length; y++) {
-			// let chainIDToAssetMappingEntity = loadChainIDToAssetMappingEntity(indexEntity.assets[y])
-			let chainIDToAssetMappingEntity = createOrLoadChainIDToAssetMappingEntity(indexAddress,chainID)
-			// chainIDToAssetMappingEntity.assets
-			// let chainIndex = chainIDToAssetMappingEntity.chainIndex
-			// if (chainIndex && chainIndex == chainIndexArray[i]) {
-			// log.error('currencyIndexArray: {} ', [currencyIndexArray.toString()])
-			log.error('chainIDToAssetMappingEntity.assets: {} ', [chainIDToAssetMappingEntity.assets.join('-')])
-				// while (currencyIndexArray.length > 0) {
-					for (let x = 0; x < chainIDToAssetMappingEntity.assets.length; x++) {
-						const assetAddress = chainIDToAssetMappingEntity.assets[x].slice(-ADDRESS_LENGTH)
-						log.warning('curr asset: {} , curr index asset : {}, ADDRESS ={}',[chainIDToAssetMappingEntity.assets[x].toString(),indexEntity.assets[x].toString(),assetAddress])
-						// let indexAssetEntity = loadIndexAssetEntity(indexEntity.assets[x])
-						// let indexAssetEntity = loadIndexAssetEntity(chainIDToAssetMappingEntity.assets[x])
-						const indexAssetEntity = createOrLoadIndexAssetEntity(indexAddress, Address.fromHexString(assetAddress), chainID)
-						log.debug('indexAssetEntity::, asset: {}, chainID: {}, id: {}...',[indexAssetEntity.asset.toString(),indexAssetEntity.chainID.toString(),indexAssetEntity.id])
-						// if (currencyIndexArray.length == 0) {
-						// 	break
-						// }
-							log.warning("indexAssetEntity.weight length {} , count : {}", [event.params.weights[x].toString(),x.toString()])
-							indexAssetEntity.weight = event.params.weights[x]
-							// currencyIndexArray.splice(0, 1)
-							indexAssetEntity.save()
-							// count++
-							
-						
-					}
-				// }
-				// break
-			// }
-		// }
+		for (let x = 0; x < chainIDToAssetMappingEntity.assets.length; x++) {
+			const indexAssetEntity = loadIndexAssetEntity(chainIDToAssetMappingEntity.assets[x])
+			indexAssetEntity.weight = event.params.weights[x]
+			indexAssetEntity.save()
+		}
+
 	}
 	indexEntity.isRebalancing = false
 	anatomyEntity.chainIdSet = event.params.newCurrencyIdSet
