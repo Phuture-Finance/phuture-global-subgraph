@@ -55,6 +55,7 @@ export function createOrLoadIndexAccountEntity(index: Bytes, account: Bytes): In
 
 export function createOrLoadIndexAssetEntity(index: Bytes, asset: Bytes, chainID: BigInt): IndexAsset {
     let id = index.toHexString().concat(chainID.toString()).concat(asset.toHexString())
+    log.debug("createOrLoadIndexAssetEntity: index={} asset={} chainID={} new_id={} ", [index.toHexString(), asset.toHexString(), chainID.toString(), id])
     let indexAsset = IndexAsset.loadInBlock(id)
     if (indexAsset == null) {
         indexAsset = IndexAsset.load(id)
