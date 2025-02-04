@@ -92,7 +92,6 @@ export function handleCurrencyRegistered(event: CurrencyRegisteredEvent): void {
 	chainIDToAssetMappingEntity.registeredAssets =
 		chainIDToAssetMappingEntity.registeredAssets!.plus(ONE);
 
-	log.debug('CurrencyRegisteredEvent chainIDToAssetMappingEntity: ', [chainIDToAssetMappingEntity.assets.join('-')])
 	chainIDToAssetMappingEntity.save();
 	indexAssetEntity.save();
 }
@@ -226,7 +225,7 @@ export function saveHistoricalData(index: Bytes, timestamp: BigInt): void {
 }
 
 export function handleFinishRebalancing(event: FinishRebalancingEvent): void {
-	log.error("weights {}", [event.params.weights.toString()])
+	log.debug("weights {}", [event.params.weights.toString()])
 	let indexAddress = dataSource.context().getBytes('indexAddress')
 	const chainID = dataSource.context().getBigInt('chainID')
 	let indexEntity = createOrLoadIndexEntity(indexAddress)
