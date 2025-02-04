@@ -1,9 +1,8 @@
-import { Bytes, BigInt, Address, ethereum, dataSource, BigDecimal, log, ByteArray, TypedMap, DataSourceContext } from "@graphprotocol/graph-ts";
-import { createOrLoadAnatomyEntity, createOrLoadChainIDToAssetMappingEntity, createOrLoadConfigEntity, createOrLoadCurrencySetEntity, createOrLoadHistoricalIndexAssetEntity, createOrLoadHistoricalIndexBalanceEntity, createOrLoadIndexAssetEntity, createOrLoadIndexEntity, loadChainIDToAssetMappingEntity, loadIndexAssetEntity } from "../EntityCreation";
-import { ConfigUpdated as ConfigUpdatedEvent, CurrencyRegistered as CurrencyRegisteredEvent, FinishChainRebalancing as FinishChainRebalancingEvent, RegisterChain as RegisterChainEvent, FinishRebalancing as FinishRebalancingEvent, SetMessenger as SetMessengerEvent, StartRebalancing as StartRebalancingEvent } from "../../generated/templates/ConfigBuilder/ConfigBuilder"
-import { convertAUMFeeRate } from "../v1/FeePool";
-import { CurrencySet, HistoricalIndexAsset } from "../../generated/schema";
+import { Address, BigDecimal, BigInt, Bytes, dataSource, DataSourceContext, ethereum, log, TypedMap } from "@graphprotocol/graph-ts";
 import { Messenger } from "../../generated/templates";
+import { ConfigUpdated as ConfigUpdatedEvent, CurrencyRegistered as CurrencyRegisteredEvent, FinishChainRebalancing as FinishChainRebalancingEvent, FinishRebalancing as FinishRebalancingEvent, RegisterChain as RegisterChainEvent, SetMessenger as SetMessengerEvent, StartRebalancing as StartRebalancingEvent } from "../../generated/templates/ConfigBuilder/ConfigBuilder";
+import { createOrLoadAnatomyEntity, createOrLoadChainIDToAssetMappingEntity, createOrLoadConfigEntity, createOrLoadCurrencySetEntity, createOrLoadHistoricalIndexAssetEntity, createOrLoadHistoricalIndexBalanceEntity, createOrLoadIndexAssetEntity, createOrLoadIndexEntity, loadChainIDToAssetMappingEntity, loadIndexAssetEntity } from "../EntityCreation";
+import { convertAUMFeeRate } from "../v1/FeePool";
 
 export function handleConfigUpdate(event: ConfigUpdatedEvent): void {
     let indexAddress = dataSource.context().getBytes('indexAddress')
