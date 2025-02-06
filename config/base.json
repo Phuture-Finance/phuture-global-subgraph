@@ -2,7 +2,20 @@
   "network": "base",
   "chainID": 8453,
   "v1": false,
-  "v2": false,
+  "v2": {
+        "indexFactory": [
+            {
+                "name": "CookieTestFactory",
+                "address": "0x91318C0675df6be2AA16A420cCC22705C66b37De",
+                "startBlock": 25377665,
+                "nativeAsset": {
+                    "name": "Ethereum",
+                    "symbol": "ETH",
+                    "decimals": 18
+                }
+            }
+        ]
+    },
   "v3": {
     "indexFactory": [
       {
