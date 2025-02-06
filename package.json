@@ -1,13 +1,13 @@
 {
-  "name": "subgraph-test",
+  "name": "base-index-test",
   "license": "UNLICENSED",
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ subgraph-test",
-    "create-local": "graph create --node http://localhost:8020/ subgraph-test",
-    "remove-local": "graph remove --node http://localhost:8020/ subgraph-test",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 subgraph-test",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ base-index-test",
+    "create-local": "graph create --node http://localhost:8020/ base-index-test",
+    "remove-local": "graph remove --node http://localhost:8020/ base-index-test",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 base-index-test",
     "test": "graph test",
     "prepare:mainnet": "npm run clean && npx mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
     "prepare:avalanche": "npm run clean && npx mustache config/avalanche.json subgraph.template.yaml > subgraph.yaml",
