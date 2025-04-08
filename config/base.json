@@ -1,35 +1,36 @@
 {
-  "network": "base",
-  "chainID": 8453,
-  "v1": false,
-  "v2": {
-        "indexFactory": [
-            {
-                "name": "CookieTestFactory",
-                "address": "0x91318C0675df6be2AA16A420cCC22705C66b37De",
-                "startBlock": 25377665,
-                "nativeAsset": {
-                    "name": "Ethereum",
-                    "symbol": "ETH",
-                    "decimals": 18
-                }
-            }
-        ]
-    },
-  "v3": {
-    "indexFactory": [
-      {
-        "name": "JMXFactoryProd",
-        "address": "0x9c5816bd3B4C360427EFC5FCbFB82A60C8c279F8",
-        "startBlock": 25771303,
-        "nativeAsset": {
-          "name": "Ethereum",
-          "symbol": "ETH",
-          "decimals": 18
-        }
-      }
-    ]
-  },
-  "ephtr": false,
-  "savingsVaults": false
+	"network": "base",
+	"chainID": 8453,
+	"v1": false,
+	"v2": false,
+	"v3": {
+		"indexFactory": [
+			{
+				"name": "IndexFactoryV3",
+				"address": "0x9c5816bd3B4C360427EFC5FCbFB82A60C8c279F8",
+				"startBlock": 25771303,
+				"nativeAsset": {
+					"name": "Ethereum",
+					"symbol": "ETH",
+					"decimals": 18
+				}
+			}
+		]
+	},
+	"jooceFeeReward": {
+		"contract": [
+			{
+				"name": "ERC20",
+				"address": "0x100CE3E3391C00B6A52911313A4Ea8D23c8a38D8",
+				"startBlock": 24861477,
+				"nativeAsset": {
+					"name": "Ethereum",
+					"symbol": "ETH",
+					"decimals": 18
+				}
+			}
+		]
+	},
+	"ephtr": false,
+	"savingsVaults": false
 }

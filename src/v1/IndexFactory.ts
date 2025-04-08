@@ -51,7 +51,7 @@ export function handleManagedIndexCreated(
       context.setBytes('indexAddress', event.params.index)
       Vault.createWithContext(vtokenAddress, context)
       let indexAssetEntity = createOrLoadIndexAssetEntity(event.params.index, token, chainID)
-      getTokenInfo(indexAssetEntity,token)
+      getTokenInfo(indexAssetEntity, token)
       indexAssetEntity.weight = BigInt.fromI32(weight)
       indexAssetEntity.save()
       chainIDAssetArray.push(indexAssetEntity.id)
