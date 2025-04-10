@@ -6,7 +6,7 @@ import {
 	log,
 } from "@graphprotocol/graph-ts";
 
-import  { Deployed as DeployedEvent } from "../../generated/IndexFactoryV3/IndexFactoryV3";
+import { Deployed as DeployedEvent } from "../../generated/IndexFactoryV3/IndexFactoryV3";
 import { IndexTokenV3 as indexTemplate } from "../../generated/templates";
 import {
 	createOrLoadChainIDToAssetMappingEntity,
@@ -26,7 +26,7 @@ export function handleIndexDeployed(event: DeployedEvent): void {
 	indexContext.setBytes("indexAddress", event.params.index);
 	indexContext.setBigInt("chainID", chainID);
 	indexTemplate.createWithContext(event.params.index, indexContext);
-	
+
 	const index = createOrLoadIndexEntity(event.params.index);
 	index.name = event.params.name;
 	index.symbol = event.params.symbol;
@@ -71,7 +71,7 @@ export function handleIndexDeployed(event: DeployedEvent): void {
 
 	const indexAssetArray: string[] = [];
 	indexAssetArray.push(chainIDToAssetMappingEntity.id);
-	log.debug('DeployedEvent indexAssetArray = {}',[indexAssetArray.join('-')])
+	log.debug('DeployedEvent indexAssetArray = {}', [indexAssetArray.join('-')])
 	index.assets = indexAssetArray;
 	chainIDToAssetMappingEntity.save();
 	indexAssetEntity.save();

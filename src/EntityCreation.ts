@@ -1,5 +1,5 @@
 import { Bytes, BigInt, BigDecimal, log, Address, ethereum } from "@graphprotocol/graph-ts"
-import { Index, Account, IndexAsset, IndexAccount, HistoricalAccountBalance, HistoricalIndexBalance, HistoricalPrice, HistoricalIndexAsset, ChainIDToAssetMapping, Config, LZConfig, Anatomy, CurrencySet } from "../generated/schema"
+import { Index, Account, IndexAsset, IndexAccount, HistoricalAccountBalance, HistoricalIndexBalance, HistoricalPrice, HistoricalIndexAsset, ChainIDToAssetMapping, Config, LZConfig, Anatomy, CurrencySet, JooceFeeReward } from "../generated/schema"
 
 export function createOrLoadIndexEntity(id: Bytes): Index {
     let index = Index.loadInBlock(id)
@@ -23,6 +23,24 @@ export function createOrLoadIndexEntity(id: Bytes): Index {
         }
     }
     return index
+}
+
+export function createOrLoadJooceTransferEntity(id: string): JooceFeeReward {
+    let rewards = JooceFeeReward.loadInBlock(id)
+    if (rewards == null) {
+        rewards = JooceFeeReward.load(id)
+        if (rewards == null) {
+            rewards = new JooceFeeReward(id)
+            rewards.from = Bytes.empty()
+            rewards.to = Bytes.empty()
+            rewards.timestamp = BigInt.zero()
+            rewards.entries = []
+            rewards.id = id
+            rewards.value = BigInt.zero()
+            rewards.save()
+        }
+    }
+    return rewards
 }
 
 export function createOrLoadAccountEntity(id: Bytes): Account {

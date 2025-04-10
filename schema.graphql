@@ -101,6 +101,14 @@ type ChainIDToAssetMapping @entity {
   assets: [IndexAsset!]!
 }
 
+type JooceFeeReward @entity {
+  id: ID!
+  from: Bytes!
+  to: Bytes!
+  value: BigInt!
+  timestamp: BigInt!
+}
+
 type Config @entity {
   id: Bytes!
   index: Index!
