@@ -6,6 +6,7 @@ import { Emissions } from "../../generated/ephtr/Emissions"
 import { createOrLoadIndexEntity, createOrLoadIndexAssetEntity, createOrLoadIndexAccountEntity, createOrLoadHistoricalAccountBalanceEntity, createOrLoadAccountEntity, createOrLoadHistoricalPriceEntity, createOrLoadChainIDToAssetMappingEntity } from "../EntityCreation"
 import { saveHistoricalData } from "../v2/ConfigBuilder"
 import { getTokenInfo } from "../v1/IndexFactory"
+import { ZERO_ADDRESS } from "../constants"
 
 export function handleTransfer(event: TransferEvent): void {
     let index = createOrLoadIndexEntity(event.address)
@@ -34,7 +35,7 @@ export function handleTransfer(event: TransferEvent): void {
         index.save()
     }
     let scalar = new BigDecimal(BigInt.fromI32(10).pow(u8(index.decimals)))
-    if (event.params.from != Address.fromString('0x0000000000000000000000000000000000000000') && event.params.value > BigInt.zero()) {
+    if (!event.params.from.equals(Address.fromString(ZERO_ADDRESS)) && event.params.value > BigInt.zero()) {
         let fromAccount = createOrLoadIndexAccountEntity(event.address, event.params.from)
         createOrLoadAccountEntity(event.params.from)
         fromAccount.balance = fromAccount.balance.minus(new BigDecimal(event.params.value).div(scalar))
@@ -46,10 +47,10 @@ export function handleTransfer(event: TransferEvent): void {
         historicalAccountBalanceEntity.balance = fromAccount.balance
         historicalAccountBalanceEntity.save()
     }
-    if (event.params.from == Address.fromString('0x0000000000000000000000000000000000000000') && event.params.to != Address.fromString('0x0000000000000000000000000000000000000000') && event.params.value > BigInt.zero()) {
+    if (event.params.from.equals(Address.fromString(ZERO_ADDRESS)) && !event.params.to.equals(Address.fromString(ZERO_ADDRESS)) && event.params.value > BigInt.zero()) {
         index.totalSupply = index.totalSupply.plus(new BigDecimal(event.params.value).div(scalar))
     }
-    if (event.params.to != Address.fromString('0x0000000000000000000000000000000000000000') && event.params.value > BigInt.zero()) {
+    if (!event.params.to.equals(Address.fromString(ZERO_ADDRESS)) && event.params.value > BigInt.zero()) {
         let toAccount = createOrLoadIndexAccountEntity(event.address, event.params.to)
         createOrLoadAccountEntity(event.params.to)
         if (toAccount.balance == BigDecimal.zero()) {
@@ -61,7 +62,7 @@ export function handleTransfer(event: TransferEvent): void {
         historicalAccountBalanceEntity.balance = toAccount.balance
         historicalAccountBalanceEntity.save()
     }
-    if (event.params.to == Address.fromString('0x0000000000000000000000000000000000000000') && event.params.from != Address.fromString('0x0000000000000000000000000000000000000000') && event.params.value > BigInt.zero()) {
+    if (event.params.to.equals(Address.fromString(ZERO_ADDRESS)) && !event.params.from.equals(Address.fromString(ZERO_ADDRESS)) && event.params.value > BigInt.zero()) {
         index.totalSupply = index.totalSupply.minus(new BigDecimal(event.params.value).div(scalar))
     }
     index.save()
