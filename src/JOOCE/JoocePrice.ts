@@ -14,7 +14,9 @@ export function handleJoocePrice(block: ethereum.Block): void {
     const ethUsdcPrice = getPrice(ethUsdcPoolContract, 18, 6)
     const jooceUsdcPrice = jooceEthPrice.times(ethUsdcPrice)
 
-    createOrLoadJoocePriceEntity(block.timestamp, jooceUsdcPrice)
+    let joocePriceEntity = createOrLoadJoocePriceEntity(block.timestamp)
+    joocePriceEntity.price = jooceUsdcPrice
+    joocePriceEntity.save()
 }
 
 

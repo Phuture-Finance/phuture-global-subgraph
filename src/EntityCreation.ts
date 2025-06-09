@@ -277,7 +277,7 @@ export function createOrLoadCurrencySetEntity(index: Bytes, chainIndex: BigInt):
 
 }
 
-export function createOrLoadJoocePriceEntity(blockTimestamp: BigInt, price: BigDecimal): JoocePrice {
+export function createOrLoadJoocePriceEntity(blockTimestamp: BigInt): JoocePrice {
     let timestamp = blockTimestamp.minus(blockTimestamp.mod(BigInt.fromI32(86400)))
     let id = timestamp.toString()
     let joocePriceEntity = JoocePrice.loadInBlock(id)
@@ -286,7 +286,7 @@ export function createOrLoadJoocePriceEntity(blockTimestamp: BigInt, price: BigD
         if (joocePriceEntity == null) {
             joocePriceEntity = new JoocePrice(id)
             joocePriceEntity.timestamp = timestamp
-            joocePriceEntity.price = price
+            joocePriceEntity.price = BigDecimal.zero()
             joocePriceEntity.save()
         }
     }
