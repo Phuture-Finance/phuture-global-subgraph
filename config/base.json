@@ -17,20 +17,9 @@
 			}
 		]
 	},
-	"jooceFeeReward": {
-		"contract": [
-			{
-				"name": "ERC20",
-				"address": "0x100CE3E3391C00B6A52911313A4Ea8D23c8a38D8",
-				"startBlock": 26026334,
-				"nativeAsset": {
-					"name": "Ethereum",
-					"symbol": "ETH",
-					"decimals": 18
-				}
-			}
-		]
-	},
+	
 	"ephtr": false,
-	"savingsVaults": false
+	"savingsVaults": false,
+	"jooceReward": true,
+	"joocePrice": true
 }

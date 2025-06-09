@@ -1,5 +1,5 @@
 "Entry point for all information related to index products"
-type Index @entity {
+type Index @entity(immutable:false) {
   id: Bytes!
   name: String!
   symbol: String!
@@ -23,13 +23,13 @@ type Index @entity {
 }
 
 "Entry point for all information related to accounts"
-type Account @entity {
+type Account @entity(immutable:false) {
   id: Bytes!
   indices: [IndexAccount!]! @derivedFrom(field: "account")
   history: [HistoricalAccountBalance!]! @derivedFrom(field: "account")
 }
 
-type IndexAsset @entity {
+type IndexAsset @entity(immutable:false) {
   id: String!
   chainID: BigInt!
   symbol: String!
@@ -42,14 +42,14 @@ type IndexAsset @entity {
   weight: BigInt
 }
 
-type IndexAccount @entity {
+type IndexAccount @entity(immutable:false) {
   id: Bytes!
   index: Bytes!
   account: Account!
   balance: BigDecimal!
 }
 
-type HistoricalIndexBalance @entity {
+type HistoricalIndexBalance @entity(immutable:false) {
   id: String!
   timestamp: BigInt!
   index: Index!
@@ -57,7 +57,7 @@ type HistoricalIndexBalance @entity {
   assets: [HistoricalIndexAsset!]!
 }
 
-type HistoricalAccountBalance @entity {
+type HistoricalAccountBalance @entity(immutable:false) {
   id: String!
   timestamp: BigInt!
   index: Bytes!
@@ -65,7 +65,7 @@ type HistoricalAccountBalance @entity {
   balance: BigDecimal!
 }
 
-type HistoricalIndexAsset @entity {
+type HistoricalIndexAsset @entity(immutable:false) {
   id: String!
   indexTimestamp: HistoricalIndexBalance!
   index: Bytes!
@@ -76,7 +76,7 @@ type HistoricalIndexAsset @entity {
   weight: BigInt
 }
 
-type HistoricalPrice @entity {
+type HistoricalPrice @entity(immutable:false) {
   id: String!
   index: Bytes!
   timestamp: BigInt!
@@ -91,7 +91,7 @@ enum ProtocolVersion {
   v3
 }
 
-type ChainIDToAssetMapping @entity {
+type ChainIDToAssetMapping @entity(immutable:false) {
   id: String!
   index: Bytes!
   chainID: BigInt!
@@ -101,15 +101,7 @@ type ChainIDToAssetMapping @entity {
   assets: [IndexAsset!]!
 }
 
-type JooceFeeReward @entity {
-  id: ID!
-  from: Bytes!
-  to: Bytes!
-  value: BigInt!
-  timestamp: BigInt!
-}
-
-type Config @entity {
+type Config @entity(immutable:false) {
   id: Bytes!
   index: Index!
   AUMDilutionPerSecond: BigInt!
@@ -121,23 +113,38 @@ type Config @entity {
   redemptionCustomCallback: Boolean!
 }
 
-type LZConfig @entity {
+type LZConfig @entity(immutable:false) {
   id: Bytes!
   index: Index!
   eIds: BigInt!
   minGas: [BigInt!]!
 }
 
-type Anatomy @entity {
+type Anatomy @entity(immutable:false) {
   id: Bytes!
   index: Index!
   chainIdSet: [BigInt!]!
   currencyIdSets: [CurrencySet!]!
 }
 
-type CurrencySet @entity {
+type CurrencySet @entity(immutable:false) {
   id: String!
   index: Bytes!
   chainIndex: BigInt!
   sets: [BigInt!]!
+}
+
+type JooceReward @entity(immutable:true) {
+  id: ID!
+  from: Bytes!
+  to: Bytes!
+  value: BigInt!
+  timestamp: BigInt!
+}
+
+
+type JoocePrice @entity(immutable:false) {
+  id: String!
+  timestamp : BigInt!
+  price : BigDecimal!
 }

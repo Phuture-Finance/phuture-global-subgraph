@@ -21,13 +21,8 @@
 			"startBlock": 1
 		}
 	},
-	"jooceFeeReward": {
-		"contract": {
-			"name": "ERC20",
-			"address": "0x0000000000000000000000000000000000000000",
-			"startBlock": 1
-		}
-	},
+	"jooceReward": true,
+	"joocePrice": true, 
 	"ephtr": true,
 	"savingsVaults": [
 		{
