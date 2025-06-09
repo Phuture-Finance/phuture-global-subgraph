@@ -32,7 +32,7 @@ dataSources:
         - name: IndexRegistry
           file: ./abis/v1/IndexRegistry.json
         - name: FeePool
-          file: ./abis/v1/feePool.json
+          file: ./abis/v1/FeePool.json
         - name: ERC20
           file: ./abis/ERC20.json
         - name: MakerERC20
