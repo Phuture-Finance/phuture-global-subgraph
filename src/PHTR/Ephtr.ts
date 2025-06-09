@@ -1,11 +1,11 @@
 import { Address, BigDecimal, BigInt, Bytes, dataSource, ethereum, log } from "@graphprotocol/graph-ts"
 import {
     Transfer as TransferEvent, ERC20
-} from "../generated/IndexFactoryV1/ERC20"
-import { Emissions } from "../generated/ephtr/Emissions"
-import { createOrLoadIndexEntity, createOrLoadIndexAssetEntity, createOrLoadIndexAccountEntity, createOrLoadHistoricalAccountBalanceEntity, createOrLoadAccountEntity, createOrLoadHistoricalPriceEntity, createOrLoadChainIDToAssetMappingEntity } from "./EntityCreation"
-import { saveHistoricalData } from "./v2/ConfigBuilder"
-import { getTokenInfo } from "./v1/IndexFactory"
+} from "../../generated/IndexFactoryV1/ERC20"
+import { Emissions } from "../../generated/ephtr/Emissions"
+import { createOrLoadIndexEntity, createOrLoadIndexAssetEntity, createOrLoadIndexAccountEntity, createOrLoadHistoricalAccountBalanceEntity, createOrLoadAccountEntity, createOrLoadHistoricalPriceEntity, createOrLoadChainIDToAssetMappingEntity } from "../EntityCreation"
+import { saveHistoricalData } from "../v2/ConfigBuilder"
+import { getTokenInfo } from "../v1/IndexFactory"
 
 export function handleTransfer(event: TransferEvent): void {
     let index = createOrLoadIndexEntity(event.address)

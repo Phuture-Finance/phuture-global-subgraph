@@ -1,5 +1,5 @@
 import { Bytes, BigInt, BigDecimal, log, Address, ethereum } from "@graphprotocol/graph-ts"
-import { Index, Account, IndexAsset, IndexAccount, HistoricalAccountBalance, HistoricalIndexBalance, HistoricalPrice, HistoricalIndexAsset, ChainIDToAssetMapping, Config, LZConfig, Anatomy, CurrencySet, JooceFeeReward } from "../generated/schema"
+import { Index, Account, IndexAsset, IndexAccount, HistoricalAccountBalance, HistoricalIndexBalance, HistoricalPrice, HistoricalIndexAsset, ChainIDToAssetMapping, Config, LZConfig, Anatomy, CurrencySet, JoocePrice, JooceReward } from "../generated/schema"
 
 export function createOrLoadIndexEntity(id: Bytes): Index {
     let index = Index.loadInBlock(id)
@@ -23,24 +23,6 @@ export function createOrLoadIndexEntity(id: Bytes): Index {
         }
     }
     return index
-}
-
-export function createOrLoadJooceTransferEntity(id: string): JooceFeeReward {
-    let rewards = JooceFeeReward.loadInBlock(id)
-    if (rewards == null) {
-        rewards = JooceFeeReward.load(id)
-        if (rewards == null) {
-            rewards = new JooceFeeReward(id)
-            rewards.from = Bytes.empty()
-            rewards.to = Bytes.empty()
-            rewards.timestamp = BigInt.zero()
-            rewards.entries = []
-            rewards.id = id
-            rewards.value = BigInt.zero()
-            rewards.save()
-        }
-    }
-    return rewards
 }
 
 export function createOrLoadAccountEntity(id: Bytes): Account {
@@ -295,3 +277,36 @@ export function createOrLoadCurrencySetEntity(index: Bytes, chainIndex: BigInt):
 
 }
 
+export function createOrLoadJoocePriceEntity(blockTimestamp: BigInt, price: BigDecimal): JoocePrice {
+    let timestamp = blockTimestamp.minus(blockTimestamp.mod(BigInt.fromI32(86400)))
+    let id = timestamp.toString()
+    let joocePriceEntity = JoocePrice.loadInBlock(id)
+    if (joocePriceEntity == null) {
+        joocePriceEntity = JoocePrice.load(id)
+        if (joocePriceEntity == null) {
+            joocePriceEntity = new JoocePrice(id)
+            joocePriceEntity.timestamp = timestamp
+            joocePriceEntity.price = price
+            joocePriceEntity.save()
+        }
+    }
+    return joocePriceEntity
+
+}
+
+export function createOrLoadJooceRewardEntity(txHash: Bytes, logIndex: BigInt, timestamp: BigInt, from: Address, to: Address, value: BigInt): JooceReward {
+    let id = `${txHash.toHexString()}-${logIndex.toString()}`
+    let jooceRewardEntity = JooceReward.loadInBlock(id)
+    if (jooceRewardEntity == null) {
+        jooceRewardEntity = JooceReward.load(id)
+        if (jooceRewardEntity == null) {
+            jooceRewardEntity = new JooceReward(id)
+            jooceRewardEntity.timestamp = timestamp
+            jooceRewardEntity.from = from
+            jooceRewardEntity.to = to
+            jooceRewardEntity.value = value
+            jooceRewardEntity.save()
+        }
+    }
+    return jooceRewardEntity
+}
