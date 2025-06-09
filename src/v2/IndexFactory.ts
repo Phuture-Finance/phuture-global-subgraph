@@ -4,6 +4,7 @@ import { Governance as GovernanceTemplate, IndexTokenV2 as indexTemplate } from 
 import { Address, BigDecimal, BigInt, Bytes, DataSourceContext, dataSource, log } from "@graphprotocol/graph-ts"
 import { IndexTokenV2 } from "../../generated/IndexFactoryV2/IndexTokenV2"
 import { getTokenInfo } from "../v1/IndexFactory"
+import { ZERO_ADDRESS } from "../constants"
 
 
 export function handleIndexDeployed(event: DeployedEvent): void {
@@ -25,7 +26,7 @@ export function handleIndexDeployed(event: DeployedEvent): void {
     index.k = BigInt.fromI32(1).times(BigInt.fromI32(10).pow(18))
     index.totalFees = BigDecimal.zero()
     let indexAssetEntity = createOrLoadIndexAssetEntity(event.params.index, event.params.reserve, chainID)
-    if (event.params.reserve != Address.fromString('0x0000000000000000000000000000000000000000')) {
+    if (!event.params.reserve.equals(Address.fromString(ZERO_ADDRESS))) {
         getTokenInfo(indexAssetEntity, event.params.reserve)
     }
     else {

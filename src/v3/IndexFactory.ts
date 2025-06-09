@@ -14,7 +14,7 @@ import {
 	createOrLoadIndexEntity,
 } from "../EntityCreation";
 
-import { ONE, WAD, ZERO } from "../constants";
+import { ONE, WAD, ZERO, ZERO_ADDRESS } from "../constants";
 import { getTokenInfo } from "../v1/IndexFactory";
 
 export function handleIndexDeployed(event: DeployedEvent): void {
@@ -42,10 +42,9 @@ export function handleIndexDeployed(event: DeployedEvent): void {
 		event.params.reserve,
 		chainID,
 	);
-	if (
-		event.params.reserve ==
-		Address.fromString("0x0000000000000000000000000000000000000000")
-	) {
+        if (
+                event.params.reserve.equals(Address.fromString(ZERO_ADDRESS))
+        ) {
 		const nativeAssetInfo = dataSource.context().get("nativeAsset")!;
 		indexAssetEntity.name = nativeAssetInfo.toArray()[0].toString();
 		indexAssetEntity.symbol = nativeAssetInfo.toArray()[1].toString();

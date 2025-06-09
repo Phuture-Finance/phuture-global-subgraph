@@ -10,6 +10,7 @@ import { createOrLoadChainIDToAssetMappingEntity, createOrLoadIndexAssetEntity, 
 import { ERC20 } from "../../generated/IndexFactoryV1/ERC20"
 import { MakerERC20 } from "../../generated/IndexFactoryV1/MakerERC20"
 import { IndexAsset } from "../../generated/schema"
+import { ZERO_ADDRESS } from "../constants"
 
 export function handleManagedIndexCreated(
   event: ManagedIndexCreatedEvent
@@ -45,7 +46,7 @@ export function handleManagedIndexCreated(
     let token = event.params._assets[i]
     let weight = event.params._weights[i]
     let vtokenAddress = vaultFactoryContract.bind(vTokenFactory).vTokenOf(token)
-    if (vtokenAddress != Address.fromString("0x0000000000000000000000000000000000000000")) {
+    if (!vtokenAddress.equals(Address.fromString(ZERO_ADDRESS))) {
       let context = new DataSourceContext()
       context.setBytes('assetAddress', token)
       context.setBytes('indexAddress', event.params.index)
