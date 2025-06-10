@@ -28,7 +28,7 @@ function getPrice(pool: UniV3Pool, decimalsToken0: u8, decimalsToken1: u8): BigD
     }
 
     const sqrtPrice = slot0Call.value.getSqrtPriceX96()
-    const priceRaw = sqrtPrice.div(BigInt.fromI32(2).pow(96)).pow(2)
+    const priceRaw = sqrtPrice.pow(2).div(BigInt.fromI32(2).pow(192))
     const scaledPrice = priceRaw.times(BigInt.fromI32(10).pow(decimalsToken0 - decimalsToken1))
 
     return scaledPrice.toBigDecimal()
