@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt, ethereum, log } from "@graphprotocol/graph-ts";
 import { UniV3Pool } from "../../generated/joocePool/UniV3Pool"
 import { createOrLoadJoocePriceEntity } from "../EntityCreation";
 
@@ -21,11 +21,16 @@ export function handleJoocePrice(block: ethereum.Block): void {
 
 
 function getPrice(pool: UniV3Pool, decimalsToken0: u8, decimalsToken1: u8): BigDecimal {
-    const sqrtPrice = pool.slot0().getSqrtPriceX96()
+    const slot0Call = pool.try_slot0()
+    if (slot0Call.reverted) {
+        log.warning('slot0 call reverted', [])
+        return BigDecimal.zero()
+    }
+
+    const sqrtPrice = slot0Call.value.getSqrtPriceX96()
     const priceRaw = sqrtPrice.div(BigInt.fromI32(2).pow(96)).pow(2)
     const scaledPrice = priceRaw.times(BigInt.fromI32(10).pow(decimalsToken0 - decimalsToken1))
 
     return scaledPrice.toBigDecimal()
-
 
 }
