@@ -1,4 +1,4 @@
-import { Bytes, BigInt, BigDecimal, log, Address, ethereum } from "@graphprotocol/graph-ts"
+import { Bytes, BigInt, BigDecimal, Address, ethereum } from "@graphprotocol/graph-ts"
 import { Index, Account, IndexAsset, IndexAccount, HistoricalAccountBalance, HistoricalIndexBalance, HistoricalPrice, HistoricalIndexAsset, ChainIDToAssetMapping, Config, LZConfig, Anatomy, CurrencySet, JoocePrice, JooceReward } from "../generated/schema"
 
 export function createOrLoadIndexEntity(id: Bytes): Index {
@@ -78,7 +78,6 @@ export function loadIndexAssetEntity(id: string): IndexAsset {
     if (indexAsset == null) {
         indexAsset = IndexAsset.load(id)
         if (indexAsset == null) {
-            log.debug("Should never enter this logic block of loadIndexAssetEntity function", [])
             indexAsset = new IndexAsset(id)
             indexAsset.index = Bytes.empty()
             indexAsset.asset = Bytes.empty()
@@ -191,7 +190,6 @@ export function loadChainIDToAssetMappingEntity(id: string): ChainIDToAssetMappi
     if (chainIDToAssetMappingEntity == null) {
         chainIDToAssetMappingEntity = ChainIDToAssetMapping.load(id)
         if (chainIDToAssetMappingEntity == null) {
-            log.debug("Should never enter this logic block of loadChainIDToAssetMappingEntity function", [])
             chainIDToAssetMappingEntity = new ChainIDToAssetMapping(id)
             chainIDToAssetMappingEntity.index = Bytes.empty()
             chainIDToAssetMappingEntity.chainID = BigInt.zero()

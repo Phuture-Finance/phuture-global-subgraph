@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, Bytes, dataSource, ethereum, log } from "@graphprotocol/graph-ts"
+import { Address, BigDecimal, BigInt, Bytes, dataSource, ethereum } from "@graphprotocol/graph-ts"
 import {
     Transfer as TransferEvent, ERC20
 } from "../../generated/IndexFactoryV1/ERC20"
@@ -83,7 +83,6 @@ export function ephtrBlockHandler(block: ethereum.Block): void {
 
     let phtrBalance = new BigDecimal(phtrContract.balanceOf(ephtrAddress))
     let totalSupply = indexEntity.totalSupply
-    log.debug("balance :{} total supply : {}", [phtrBalance.toString(), totalSupply.toString()])
 
     if (phtrBalance > BigDecimal.zero() && totalSupply > BigDecimal.zero()) {
         let withdrawableAmount = new BigDecimal(emissionsContract.withdrawable())
