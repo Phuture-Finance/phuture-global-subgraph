@@ -1,4 +1,8 @@
-import { BigInt, TypedMap } from "@graphprotocol/graph-ts"; 
+// Helper utilities for converting between chain identifiers and
+// native asset metadata. These utilities allow handlers to remain
+// agnostic of the underlying chain while still retrieving symbol
+// and decimal information for the native token of that chain.
+import { BigInt, TypedMap } from "@graphprotocol/graph-ts";
 
 let chainIDMap = new TypedMap<BigInt, Array<string>>()
 chainIDMap.set(BigInt.fromI32(43114), ["Avalanche", "AVAX", "18"])
@@ -31,6 +35,8 @@ chainIDMap.set(BigInt.fromI32(7700), ["Canto", "CANTO", "18"])
 chainIDMap.set(BigInt.fromI32(59140), ["Ethereum", "ETH", "18"])
 chainIDMap.set(BigInt.fromI32(5611), ["Binance Coin", "tBNB", "18"])
 
+// Returns information about the native asset for a given chain ID.
+// The returned array has the form [name, symbol, decimals].
 export function selectNativeAsset(chainID: BigInt): Array<string> | null {
   return chainIDMap.get(chainID)
 }

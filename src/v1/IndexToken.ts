@@ -1,3 +1,5 @@
+// Event handlers for the v1 IndexToken template. Responsible for
+// updating balances and anatomy of a given index token instance.
 import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts"
 import {
   AssetRemoved as AssetRemovedEvent,
@@ -10,6 +12,8 @@ import { saveHistoricalData } from "../v2/ConfigBuilder"
 import { ZERO_ADDRESS } from "../constants"
 
 
+// Track transfers of index tokens and update holder counts and
+// balances accordingly.
 export function handleTransfer(event: TransferEvent): void {
   let index = createOrLoadIndexEntity(event.address)
   let scalar = new BigDecimal(BigInt.fromI32(10).pow(u8(index.decimals)))
@@ -49,6 +53,7 @@ export function handleTransfer(event: TransferEvent): void {
   saveHistoricalData(event.address, event.block.timestamp)
 }
 
+// Remove an asset from the list of tracked index components.
 export function handleAssetRemoved(event: AssetRemovedEvent): void {
   let index = createOrLoadIndexEntity(event.address)
   let chainIDToAssetMappingEntity = createOrLoadChainIDToAssetMappingEntity(event.address, index.chainID)
@@ -62,6 +67,7 @@ export function handleAssetRemoved(event: AssetRemovedEvent): void {
   chainIDToAssetMappingEntity.save()
 }
 
+// Add or update an asset's weight within the index.
 export function handleUpdateAnatomy(event: UpdateAnatomyEvent): void {
   let index = createOrLoadIndexEntity(event.address)
   let chainIDToAssetMappingEntity = createOrLoadChainIDToAssetMappingEntity(event.address, index.chainID)

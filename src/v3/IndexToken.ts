@@ -1,7 +1,9 @@
+// Event handlers for the v3 IndexToken template which manages
+// deposits, withdrawals and fee accounting.
 import {
-	BigDecimal,
-	DataSourceContext,
-	dataSource,
+        BigDecimal,
+        DataSourceContext,
+        dataSource,
 } from "@graphprotocol/graph-ts";
 import { ConfigBuilderV3 as ConfigBuilderTemplate } from "../../generated/templates";
 import {
@@ -22,6 +24,7 @@ import { saveHistoricalData } from "./ConfigBuilder";
 
 export { handleTransfer } from "../v1/IndexToken";
 
+// Record a deposit into the index and update the reserve asset balance.
 export function handleDeposit(event: DepositEvent): void {
 	const indexContext = dataSource.context();
 	const reserveAsset = indexContext.getBytes("reserveAsset");
@@ -43,6 +46,8 @@ export function handleDeposit(event: DepositEvent): void {
 	saveHistoricalData(event.address, event.block.timestamp);
 }
 
+// Handle redemptions from the index and adjust asset balances. Also
+// applies any burn logic provided by the contract.
 export function handleWithdraw(event: WithdrawEvent): void {
 	const indexContext = dataSource.context();
 	const reserveAsset = indexContext.getBytes("reserveAsset");

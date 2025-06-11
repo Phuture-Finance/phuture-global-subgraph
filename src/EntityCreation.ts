@@ -1,6 +1,11 @@
+// Helper functions responsible for loading or initializing entities
+// used throughout the subgraph. If an entity does not exist it will
+// be created with sensible defaults so event handlers can safely
+// mutate fields without additional null checks.
 import { Bytes, BigInt, BigDecimal, Address, ethereum } from "@graphprotocol/graph-ts"
 import { Index, Account, IndexAsset, IndexAccount, HistoricalAccountBalance, HistoricalIndexBalance, HistoricalPrice, HistoricalIndexAsset, ChainIDToAssetMapping, Config, LZConfig, Anatomy, CurrencySet, JoocePrice, JooceReward } from "../generated/schema"
 
+// Fetch an existing Index entity or create a new one with default values.
 export function createOrLoadIndexEntity(id: Bytes): Index {
     let index = Index.loadInBlock(id)
     if (index == null) {
