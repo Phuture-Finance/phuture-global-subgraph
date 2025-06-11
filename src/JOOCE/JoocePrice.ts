@@ -35,18 +35,16 @@ export function handleJooceSwap(event: Swap): void {
 
 // Helper that reads the current price from a Uniswap V3 pool and
 // returns it as a decimal adjusted for token decimals.
-function getPrice(pool: UniV3Pool, decimalsToken0: u8, decimalsToken1: u8): BigDecimal {
+function getPrice(pool: UniV3Pool, decimalsToken0: u8, decimalsToken1: u8,): BigDecimal {
     const slot0Call = pool.try_slot0()
     if (slot0Call.reverted) {
         log.warning('slot0 call reverted', [])
         return BigDecimal.zero()
     }
 
-    const sqrtPrice = slot0Call.value.getSqrtPriceX96().toBigDecimal()
-    const priceRaw = sqrtPrice.times(sqrtPrice).div(BigInt.fromI32(2).pow(192).toBigDecimal())
-    const scaledPrice = priceRaw.times(BigInt.fromI32(10).pow(decimalsToken0 - decimalsToken1).toBigDecimal())
+    const sqrtPrice = slot0Call.value.getSqrtPriceX96()
 
-    return scaledPrice
+    return getPriceFromSqrtPrice(sqrtPrice, decimalsToken0, decimalsToken1)
 
 }
 
