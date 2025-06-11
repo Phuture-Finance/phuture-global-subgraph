@@ -1,10 +1,10 @@
 import {
-	BigDecimal,
-	BigInt,
-	Bytes,
-	dataSource,
-	ethereum,
-	log
+        BigDecimal,
+        BigInt,
+        Bytes,
+        dataSource,
+        ethereum,
+        log
 } from "@graphprotocol/graph-ts";
 
 import {
@@ -70,10 +70,9 @@ export function handleStartRebalancing(event: StartRebalancingEvent): void {
 }
 
 export function handleCurrencyRegistered(event: CurrencyRegisteredEvent): void {
-	const builderContext = dataSource.context()
-	const indexAddress = builderContext.getBytes("indexAddress");
-	const chainID = builderContext.getBigInt("chainID");
-	log.debug("Currency registered event: {} {} {} {} {}", [event.params.name, event.params.symbol, event.params.decimals.toString(), event.params.currency.toHexString(), chainID.toString()])
+        const builderContext = dataSource.context()
+        const indexAddress = builderContext.getBytes("indexAddress");
+        const chainID = builderContext.getBigInt("chainID");
 
 	const indexAssetEntity = createOrLoadIndexAssetEntity(
 		indexAddress,
@@ -175,13 +174,12 @@ export function handleFinishChainRebalancing(
 		chainIDToAssetMappingEntity.assets = chainIDAssetArray;
 		chainIDToAssetMappingEntity.save();
 
-		if (!indexEntity.assets.includes(chainIDToAssetMappingEntity.id)) {
-			const indexAssetArray = indexEntity.assets;
-			indexAssetArray.push(chainIDToAssetMappingEntity.id);
-			log.debug('indexAssetArray: {}', [indexAssetArray.join('-')])
-			indexEntity.assets = indexAssetArray;
-			indexEntity.save();
-		}
+                if (!indexEntity.assets.includes(chainIDToAssetMappingEntity.id)) {
+                        const indexAssetArray = indexEntity.assets;
+                        indexAssetArray.push(chainIDToAssetMappingEntity.id);
+                        indexEntity.assets = indexAssetArray;
+                        indexEntity.save();
+                }
 	}
 	chainIDToAssetMappingEntity.save();
 	indexEntity.k = WAD;
@@ -225,7 +223,6 @@ export function saveHistoricalData(index: Bytes, timestamp: BigInt): void {
 }
 
 export function handleFinishRebalancing(event: FinishRebalancingEvent): void {
-	log.debug("weights {}", [event.params.weights.toString()])
 	let indexAddress = dataSource.context().getBytes('indexAddress')
 	const chainID = dataSource.context().getBigInt('chainID')
 	let indexEntity = createOrLoadIndexEntity(indexAddress)

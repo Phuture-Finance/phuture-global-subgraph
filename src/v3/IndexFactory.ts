@@ -2,8 +2,7 @@ import {
 	Address,
 	BigDecimal,
 	DataSourceContext,
-	dataSource,
-	log,
+        dataSource,
 } from "@graphprotocol/graph-ts";
 
 import { Deployed as DeployedEvent } from "../../generated/IndexFactoryV3/IndexFactoryV3";
@@ -68,11 +67,10 @@ export function handleIndexDeployed(event: DeployedEvent): void {
 	chainIDToAssetMappingEntity.registeredAssets =
 		chainIDToAssetMappingEntity.registeredAssets!.plus(ONE);
 
-	const indexAssetArray: string[] = [];
-	indexAssetArray.push(chainIDToAssetMappingEntity.id);
-	log.debug('DeployedEvent indexAssetArray = {}', [indexAssetArray.join('-')])
-	index.assets = indexAssetArray;
-	chainIDToAssetMappingEntity.save();
-	indexAssetEntity.save();
-	index.save();
+        const indexAssetArray: string[] = [];
+        indexAssetArray.push(chainIDToAssetMappingEntity.id);
+        index.assets = indexAssetArray;
+        chainIDToAssetMappingEntity.save();
+        indexAssetEntity.save();
+        index.save();
 }
