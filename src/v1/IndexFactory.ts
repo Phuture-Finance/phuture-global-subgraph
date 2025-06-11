@@ -1,3 +1,6 @@
+// Event handlers for the v1 IndexFactory contract. These handlers
+// are responsible for bootstrapping new index subgraphs as indexes
+// are deployed on-chain.
 import { Address, BigDecimal, Bytes, DataSourceContext, log, BigInt, dataSource } from "@graphprotocol/graph-ts"
 import {
   ManagedIndexCreated as ManagedIndexCreatedEvent
@@ -12,6 +15,8 @@ import { MakerERC20 } from "../../generated/IndexFactoryV1/MakerERC20"
 import { IndexAsset } from "../../generated/schema"
 import { ZERO_ADDRESS } from "../constants"
 
+// Fired when the factory deploys a new managed index.
+// Creates templates for the new contracts and seeds initial entities.
 export function handleManagedIndexCreated(
   event: ManagedIndexCreatedEvent
 ): void {
@@ -64,6 +69,8 @@ export function handleManagedIndexCreated(
   indexEntity.save()
 }
 
+// Helper used by the factory handlers to populate basic token
+// metadata for assets that belong to an index.
 export function getTokenInfo(indexAssetEntity: IndexAsset, tokenAddress: Bytes): void {
   let tokenContract = ERC20.bind(Address.fromBytes(tokenAddress))
   let makerERC20Contract = MakerERC20.bind(Address.fromBytes(tokenAddress))

@@ -1,7 +1,9 @@
+// Event handlers for the v3 IndexFactory. Similar to previous
+// versions but with updated entities and templates.
 import {
-	Address,
-	BigDecimal,
-	DataSourceContext,
+        Address,
+        BigDecimal,
+        DataSourceContext,
         dataSource,
 } from "@graphprotocol/graph-ts";
 

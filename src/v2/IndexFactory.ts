@@ -1,3 +1,6 @@
+// Handlers for the v2 IndexFactory. When a new index is deployed we
+// create dynamic data sources for the governance and index token
+// contracts and initialise the associated entities.
 import { Deployed as DeployedEvent } from "../../generated/IndexFactoryV2/IndexFactoryV2"
 import { createOrLoadChainIDToAssetMappingEntity, createOrLoadIndexAssetEntity, createOrLoadIndexEntity } from "../EntityCreation"
 import { Governance as GovernanceTemplate, IndexTokenV2 as indexTemplate } from "../../generated/templates"

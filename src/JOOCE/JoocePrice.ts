@@ -1,3 +1,5 @@
+// Periodically samples the JOOCE/USDC price from Uniswap V3 pools and
+// stores it so historical price charts can be generated.
 import { Address, BigDecimal, BigInt, ethereum, log } from "@graphprotocol/graph-ts";
 import { UniV3Pool } from "../../generated/joocePool/UniV3Pool"
 import { createOrLoadJoocePriceEntity } from "../EntityCreation";
@@ -17,6 +19,8 @@ export function handleJoocePrice(block: ethereum.Block): void {
 }
 
 
+// Helper that reads the current price from a Uniswap V3 pool and
+// returns it as a decimal adjusted for token decimals.
 function getPrice(pool: UniV3Pool, decimalsToken0: u8, decimalsToken1: u8): BigDecimal {
     const slot0Call = pool.try_slot0()
     if (slot0Call.reverted) {
