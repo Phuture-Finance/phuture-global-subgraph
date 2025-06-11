@@ -273,9 +273,12 @@ dataSources:
       language: wasm/assemblyscript
       entities: 
         - JoocePrice
-      abis: 
+      abis:
         - name: UniV3Pool
           file: ./abis/UniV3Pool.json
+      eventHandlers:
+        - event: Swap(indexed address,indexed address,int256,int256,uint160,uint128,int24)
+          handler: handleJooceSwap
       blockHandlers:
         - handler: handleJoocePrice
           filter:
