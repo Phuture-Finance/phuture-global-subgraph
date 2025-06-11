@@ -1,7 +1,7 @@
 // Periodically samples the JOOCE/USDC price from Uniswap V3 pools and
 // stores it so historical price charts can be generated.
 import { Address, BigDecimal, BigInt, ethereum, log } from "@graphprotocol/graph-ts";
-import { UniV3Pool } from "../../generated/joocePool/UniV3Pool"
+import { UniV3Pool, Swap } from "../../generated/joocePool/UniV3Pool"
 import { createOrLoadJoocePriceEntity } from "../EntityCreation";
 
 export function handleJoocePrice(block: ethereum.Block): void {
@@ -14,6 +14,20 @@ export function handleJoocePrice(block: ethereum.Block): void {
     const jooceUsdcPrice = jooceEthPrice.times(ethUsdcPrice)
 
     let joocePriceEntity = createOrLoadJoocePriceEntity(block.timestamp)
+    joocePriceEntity.price = jooceUsdcPrice
+    joocePriceEntity.save()
+}
+
+// Record JOOCE price whenever a swap occurs in the JOOCE/ETH pool.
+export function handleJooceSwap(event: Swap): void {
+    const ethUsdcPoolAddress = Address.fromString("0xd0b53D9277642d899DF5C87A3966A349A798F224")
+    const ethUsdcPoolContract = UniV3Pool.bind(ethUsdcPoolAddress)
+
+    const jooceEthPrice = getPriceFromSqrtPrice(event.params.sqrtPriceX96, 18, 18)
+    const ethUsdcPrice = getPrice(ethUsdcPoolContract, 18, 6)
+    const jooceUsdcPrice = jooceEthPrice.times(ethUsdcPrice)
+
+    let joocePriceEntity = createOrLoadJoocePriceEntity(event.block.timestamp)
     joocePriceEntity.price = jooceUsdcPrice
     joocePriceEntity.save()
 }
@@ -34,4 +48,13 @@ function getPrice(pool: UniV3Pool, decimalsToken0: u8, decimalsToken1: u8): BigD
 
     return scaledPrice
 
+}
+
+// Converts a sqrtPriceX96 value from a swap event into a decimal price.
+function getPriceFromSqrtPrice(sqrtPrice: BigInt, decimalsToken0: u8, decimalsToken1: u8): BigDecimal {
+    const sqrtPriceBD = sqrtPrice.toBigDecimal()
+    const priceRaw = sqrtPriceBD.times(sqrtPriceBD).div(BigInt.fromI32(2).pow(192).toBigDecimal())
+    const scaledPrice = priceRaw.times(BigInt.fromI32(10).pow(decimalsToken0 - decimalsToken1).toBigDecimal())
+
+    return scaledPrice
 }
